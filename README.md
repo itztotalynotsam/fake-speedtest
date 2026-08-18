@@ -268,3 +268,10 @@ The complete preset list is available directly within the application.
 This project was generated with assistance from **Claude by Anthropic**.
 
 AI-generated code has been reviewed, modified, or configured by me.
+
+## Credits
+JetBrains Mono — typeface by JetBrains, used throughout the interface. Licensed under the SIL Open Font License 1.1.
+IBM Plex Sans — typeface by IBM, used for interface text. Licensed under the SIL Open Font License 1.1.
+
+## This project is fully open source, feel free to contribute to this repo
+## Made with love in Slovakia <3
