@@ -1,5 +1,6 @@
 # fake-speedtest
 # Code name: Testspeed
+# TO USE SPEEDTEST, CLICK ON LINK THAT IS UNDER THE ABOUT ON THIS SITE
 A configurable fake speedtest website with simulated network behavior, connection types, ISPs, servers, weather effects, and connection failures.
 
 ## Disclaimer
