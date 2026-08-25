@@ -378,6 +378,7 @@
     sk:{label:'SlovaTel+ (Bratislava, Slovakia)', extra:12},
     sk2:{label:'Orangina Slovensko (Bratislava, Slovakia)', extra:13},
     sk3:{label:'O-Dva Slovensko (Bratislava, Slovakia)', extra:14},
+    sk4:{label:'Antika Internet (Bratislava, Slovakia)', extra:226},
     si:{label:'TeleSlovenija+ (Ljubljana, Slovenia)', extra:15},
     es:{label:'MoviStarz (Madrid, Spain)', extra:19},
     es2:{label:'Orangina España (Madrid, Spain)', extra:20},
