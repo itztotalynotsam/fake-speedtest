@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Testspeed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <div>
+      <div class="brand">
+        <div class="brand-mark">Testspeed</div>
+        <div class="net-badge" id="netBadge" title="Network type">
+          <span class="net-icon" id="netIcon"></span>
+          <span class="net-label" id="netLabel">Internet</span>
+        </div>
+      </div>
+    </div>
+    <button class="gear-btn" id="gearBtn" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+      </svg>
+    </button>
+  </header>
+
+  <main>
+    <div class="stage">
+      <canvas id="wave"></canvas>
+      <div class="readout">
+        <div class="phase-label" id="phaseLabel">READY</div>
+        <div class="big-number" id="bigNumber"><span id="bigValue">0.00</span><span class="unit" id="bigUnit">Mbps</span></div>
+        <div class="sub-stats">
+          <div>PING <b id="pingVal">—</b> ms</div>
+          <div>JITTER <b id="jitterVal">—</b> ms</div>
+        </div>
+        <div class="error-message" id="errorMessage"></div>
+      </div>
+    </div>
+
+    <button class="start-btn" id="startBtn">START TEST</button>
+    <div class="server-line" id="serverLine">Server: Auto (Nearest) · ISP: Simulated Broadband</div>
+    <div class="server-line" id="deviceLine">Device: My-Device</div>
+    <div class="server-line" id="ipLine">Your IP: —</div>
+    <div class="server-line" id="techLine">Tech: —</div>
+    <div class="server-line" id="weatherLine" style="display:none;">Weather: —</div>
+
+    <div class="results" id="results">
+      <div class="result-card rcard-ping">
+        <div class="rlabel">PING</div>
+        <div class="rvalue" id="resPing">0</div><span class="runit">ms</span>
+      </div>
+      <div class="result-card rcard-down">
+        <div class="rlabel">DOWNLOAD</div>
+        <div class="rvalue" id="resDown">0.0</div><span class="runit" id="resDownUnit">Mbps</span>
+      </div>
+      <div class="result-card rcard-up">
+        <div class="rlabel">UPLOAD</div>
+        <div class="rvalue" id="resUp">0.0</div><span class="runit" id="resUpUnit">Mbps</span>
+      </div>
+      <div class="result-card rcard-loss">
+        <div class="rlabel">PACKET LOSS</div>
+        <div class="rvalue" id="resLoss">0.0</div><span class="runit">%</span>
+      </div>
+    </div>
+    <div class="result-timestamp" id="resultTimestamp"></div>
+  </main>
+
+<footer class="site-footer">
+    <nav class="footer-links">
+      <a href="https://github.com/itztotalynotsam/fake-speedtest/blob/main/README.md" class="footer-link">About</a>
+      <a href="https://github.com/itztotalynotsam/fake-speedtest/releases" class="footer-link">Releases</a>
+      <a href="https://github.com/itztotalynotsam/fake-speedtest" class="footer-link">Github</a>
+      <a href="https://github.com/itztotalynotsam/fake-speedtest/blob/main/SECURITY.md" class="footer-link">Privacy Policy</a>
+      <a href="https://github.com/itztotalynotsam/fake-speedtest/blob/main/LICENSE" class="footer-link">Terms of Service</a>
+    </nav>
+    <div class="footer-copy">(no copyright) 2026 Testspeed. All rights not reserved.</div>
+    <div class="footer-disclaimer">Testspeed results are simulated for entertainment and testing purposes only. They do not reflect your actual internet connection speed.</div>
+  </footer>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="config-panel" id="configPanel">
+  <div class="config-header">
+    <h2>CONFIGURATION</h2>
+    <button class="close-btn" id="closeBtn">&times;</button>
+  </div>
+
+  <div class="field">
+    <label>Connection preset</label>
+    <select id="preset">
+      <optgroup label="Fiber (FTTH)">
+        <option value="fiber100">Fiber — 100 Mbps</option>
+        <option value="fiber200">Fiber — 200 Mbps</option>
+        <option value="fiber500">Fiber — 500 Mbps</option>
+        <option value="fiber1g">Fiber — 1 Gbps</option>
+        <option value="fiber2_5g">Fiber — 2.5 Gbps</option>
+        <option value="fiber5g">Fiber — 5 Gbps</option>
+        <option value="fiber10g">Fiber — 10 Gbps</option>
+        <option value="gpon_std">GPON (Standard FTTH) — 1000/500</option>
+        <option value="xgspon_std">XGS-PON (10G Symmetrical) — 8000/8000</option>
+        <option value="pon25g">25G PON (Next-Gen FTTH) — 20000/20000</option>
+        <option value="munifiber">Municipal Fiber Co-op — 500/500</option>
+      </optgroup>
+      <optgroup label="Wi-Fi (Local Wireless)">
+        <option value="wifi4">Wi-Fi 4 (802.11n) — 100/100</option>
+        <option value="wifi5">Wi-Fi 5 (802.11ac) — 400/400</option>
+        <option value="wifi6">Wi-Fi 6 (802.11ax) — 800/800</option>
+        <option value="wifi6e">Wi-Fi 6E — 1500/1500</option>
+        <option value="wifi7">Wi-Fi 7 (802.11be) — 3000/3000</option>
+        <option value="oldrouter24">Old Router (2.4 GHz only) — 25/10</option>
+        <option value="apartmentwifi">Apartment Congested Wi-Fi — 60/20</option>
+        <option value="homemesh">Modern Home Mesh — 500/500</option>
+        <option value="gamingethernet">Gaming PC Ethernet — 500/50</option>
+        <option value="publichotspot">Public Hotspot — 15/3</option>
+        <option value="wifidirect">Wi-Fi Direct (Peer-to-Peer) — 250/250</option>
+        <option value="dormethernet">Dorm Ethernet (Congested) — 200/50</option>
+        <option value="plwifiext">Powerline Wi-Fi Extender — 40/10</option>
+        <option value="meshdeadzone">Mesh Wi-Fi Dead Zone (Far Node) — 15/5</option>
+      </optgroup>
+      <optgroup label="Cable">
+        <option value="cablebasic">Cable — 100/10</option>
+        <option value="cable200">Cable — 200/10</option>
+        <option value="cable">Cable — 300/20</option>
+        <option value="cable500">Cable — 500/20</option>
+        <option value="cablegig">Cable Gig — 1200/35</option>
+        <option value="cable2gig">Cable Multi-Gig — 2000/100</option>
+        <option value="cable4gig">Cable Multi-Gig — 4000/400</option>
+      </optgroup>
+      <optgroup label="DSL">
+        <option value="basicdsl">Basic DSL — 6/0.5</option>
+        <option value="adsl2">ADSL2+ — 20/1</option>
+        <option value="dsl">VDSL2 — 40/10</option>
+        <option value="gfast">G.fast — 350/50</option>
+      </optgroup>
+      <optgroup label="WISP (Small ISP)">
+        <option value="wisp10">WISP 10 — 10/3</option>
+        <option value="wisp20">WISP 20 — 20/5</option>
+        <option value="wisp45">WISP 45 — 45/10</option>
+        <option value="wisp60">WISP 60 — 60/12</option>
+        <option value="wisp100">WISP 100 — 100/20</option>
+        <option value="wisppro">WISP Pro — 150/30</option>
+        <option value="licensedmw">Licensed Microwave Backhaul — 500/500</option>
+        <option value="eband">E-band (70/80 GHz) Backhaul — 10000/10000</option>
+        <option value="ptp5g_af">PtP Wireless, 5 GHz (airFiber-class) — 500/500</option>
+        <option value="ptp24g_af">PtP Wireless, 24 GHz (airFiber-class) — 1000/1000</option>
+        <option value="ptp60g_af">PtP Wireless, 60 GHz (GigaBeam-class) — 1500/1500</option>
+        <option value="ptp11g_af">PtP Wireless, 11 GHz Licensed (airFiber-class) — 1000/1000</option>
+      </optgroup>
+      <optgroup label="Mobile & Cellular">
+        <option value="edge">2G EDGE — 0.2/0.1</option>
+        <option value="umts">3G UMTS — 1.5/0.5</option>
+        <option value="hspa">3G HSPA+ — 8/2</option>
+        <option value="lte">4G LTE — 45/12</option>
+        <option value="ltea">4G LTE-Advanced — 120/25</option>
+        <option value="ltecat18">4G LTE Cat18 (Gigabit LTE) — 300/50</option>
+        <option value="mobile5g">5G Sub-6 (NSA) — 250/30</option>
+        <option value="sa5g">5G SA (Standalone) — 900/100</option>
+        <option value="mmwave">5G mmWave — 1800/120</option>
+        <option value="fiveg_adv">5G-Advanced (3GPP Rel-18) — 2500/300</option>
+        <option value="fixedwireless">5G Fixed Wireless — 300/50</option>
+        <option value="fiveghomebasic">5G Home Internet (Basic) — 75/12</option>
+        <option value="cbrs">CBRS Private LTE (Band 48) — 100/20</option>
+        <option value="weaksignal">Roaming / Weak Signal — 5/2</option>
+        <option value="throttledmobile">Throttled Mobile (Data Cap Exceeded) — 0.128/0.064</option>
+        <option value="openran">Private 5G (OpenRAN) — 300/300</option>
+      </optgroup>
+      <optgroup label="Satellite">
+        <option value="starlink">LEO Satellite — 220/25</option>
+        <option value="starlinkpro">LEO Satellite (Priority) — 350/40</option>
+        <option value="starlinkmaritime">LEO Satellite (Maritime) — 180/20</option>
+        <option value="starlinkaviation">LEO Satellite (Aviation) — 150/20</option>
+        <option value="starlinkmini">Starlink Mini (Compact Terminal) — 90/10</option>
+        <option value="directcell">Satellite Direct-to-Cell — 0.02/0.01</option>
+        <option value="meo">MEO Satellite — 150/20</option>
+        <option value="satellite">GEO Satellite — 25/3</option>
+      </optgroup>
+      <optgroup label="Shared, Legacy &amp; Novelty">
+        <option value="basicbroadband">Basic Broadband (Legacy FCC Min) — 25/3</option>
+        <option value="dialup">Dial-Up (56k Modem) — 0.056/0.033</option>
+        <option value="isdn">ISDN (Basic Rate) — 0.128/0.128</option>
+        <option value="powerline">Powerline (HomePlug AV2) — 80/20</option>
+        <option value="meshnet">Community Mesh Wi-Fi — 60/15</option>
+        <option value="campuswifi">Campus Wi-Fi — 200/50</option>
+        <option value="publicwifi">Public Wi-Fi (Coffee Shop) — 25/5</option>
+        <option value="hotelwifi">Hotel Wi-Fi — 15/3</option>
+      </optgroup>
+      <optgroup label="Business &amp; Emerging Tech">
+        <option value="t1line">T1 Leased Line — 1.5/1.5</option>
+        <option value="efm">EFM Business Line — 50/50</option>
+        <option value="metroe">Metro Ethernet — 1000/1000</option>
+        <option value="sdwan">SD-WAN (Multi-Path) — 500/500</option>
+        <option value="urllc">5G URLLC Network Slice — 150/150</option>
+        <option value="tvws">TV White Space — 12/4</option>
+        <option value="sixg">6G Preview (Experimental) — 9800/9800</option>
+        <option value="fso">Free-Space Optical (Laser Link) — 2500/2500</option>
+        <option value="submarine">Submarine Cable (Wholesale Transit) — 9800/9800</option>
+        <option value="vsat">VSAT (Remote / Field Terminal) — 10/3</option>
+        <option value="nbiot">NB-IoT (Cellular LPWAN) — 0.06/0.06</option>
+        <option value="lorawan">LoRaWAN (Unlicensed LPWAN) — 0.01/0.01</option>
+        <option value="corpvpn">Corporate VPN (Broadband Backhaul) — 150/20</option>
+      </optgroup>
+      <optgroup label="Data Center &amp; Backbone">
+        <option value="dc10g">10GbE (Data Center) — 10000/10000</option>
+        <option value="dc25g">25GbE (Data Center) — 25000/25000</option>
+        <option value="dc40g">40GbE (Data Center) — 40000/40000</option>
+        <option value="dc100g">100GbE (Backbone) — 100000/100000</option>
+        <option value="dc400g">400GbE (Core Network) — 400000/400000</option>
+        <option value="zrplus">800ZR+ Coherent Optical — 800000/800000</option>
+      </optgroup>
+      <optgroup label="Niche &amp; Retro Tech">
+        <option value="lifi">Li-Fi (Visible Light) — 1000/1000</option>
+        <option value="tokenring">Token Ring (Legacy LAN) — 16/16</option>
+        <option value="bluetooth">Bluetooth Tethering (PAN) — 2/1</option>
+        <option value="zigbee">Zigbee (Smart Home Mesh) — 0.25/0.25</option>
+        <option value="thunderbolt">Thunderbolt Bridge (Direct Link) — 10000/10000</option>
+      </optgroup>
+      <option value="custom">Custom</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>ISP</label>
+    <select id="ispPreset"></select>
+  </div>
+  <div class="field" id="ispCustomWrap" style="display:none;">
+    <label>Custom ISP name</label>
+    <input type="text" id="ispCustomInput" maxlength="40" placeholder="e.g. PixieNet Broadband">
+  </div>
+
+  <div class="field">
+    <label>Device name</label>
+    <input type="text" id="deviceName" value="My-Device" maxlength="30">
+  </div>
+
+  <div class="field">
+    <label>Technology preset</label>
+    <select id="techPreset"></select>
+  </div>
+  <div class="field" id="techCustomWrap" style="display:none;">
+    <label>Custom technology text</label>
+    <input type="text" id="techCustomInput" maxlength="80" placeholder="e.g. PixieNet FiberBeam — proprietary photonic mesh">
+  </div>
+
+  <div class="field">
+    <label>Server location</label>
+   <select id="location">
+      <option value="auto">Auto (Nearest)</option>
+      <optgroup label="Europe">
+        <option value="al">AlbaTelecom (Tirana, Albania)</option>
+        <option value="ad">AndoCom (Andorra la Vella, Andorra)</option>
+        <option value="at">A2 Telekom (Vienna, Austria)</option>
+        <option value="at2">Violett Österreich (Vienna, Austria)</option>
+        <option value="at3">Vier Österreich (Vienna, Austria)</option>
+        <option value="by">BeloTelecom (Minsk, Belarus)</option>
+        <option value="be">Proximost (Brussels, Belgium)</option>
+        <option value="be2">Lemon Belgique (Brussels, Belgium)</option>
+        <option value="be3">TeleInternet Belgium (Brussels, Belgium)</option>
+        <option value="ba">Hrvatski Telecom BiH (Sarajevo, Bosnia and Herzegovina)</option>
+        <option value="bg">VivalCom (Sofia, Bulgaria)</option>
+        <option value="hr">Hrvatski Telecom (Zagreb, Croatia)</option>
+        <option value="hr2">A2 Hrvatska (Zagreb, Croatia)</option>
+        <option value="hr3">Telemesh Hrvatska (Zagreb, Croatia)</option>
+        <option value="cy">Vodaroam CY (Nicosia, Cyprus)</option>
+        <option value="cz">O3 CZ (Prague, Czechia)</option>
+        <option value="cz2">T-Mobil CZ (Prague, Czechia)</option>
+        <option value="cz3">Vodaroam CZ (Prague, Czechia)</option>
+        <option value="dk">eTDC Nordic (Copenhagen, Denmark)</option>
+        <option value="dk2">Telenord Danmark (Copenhagen, Denmark)</option>
+        <option value="dk3">Telias Danmark (Copenhagen, Denmark)</option>
+        <option value="ee">Telias Eesti (Tallinn, Estonia)</option>
+        <option value="fi">Elisar Oyj (Helsinki, Finland)</option>
+        <option value="fi2">Telias Suomi (Helsinki, Finland)</option>
+        <option value="fi3">DeeEnAy Suomi (Helsinki, Finland)</option>
+        <option value="fr">Lemon Télécom (Paris, France)</option>
+        <option value="fr2">SFRaudband (Paris, France)</option>
+        <option value="fr3">Freeloader Télécom (Paris, France)</option>
+        <option value="de">Deutsche Telecom (Frankfurt, Germany)</option>
+        <option value="de2">Vodaroam Deutschland (Frankfurt, Germany)</option>
+        <option value="de3">O3 Deutschland (Frankfurt, Germany)</option>
+        <option value="gr">KozmoteGR (Athens, Greece)</option>
+        <option value="gr2">Vodaroam Hellas (Athens, Greece)</option>
+        <option value="gr3">NovaNot Hellas (Athens, Greece)</option>
+        <option value="hu">Magyar Telecom (Budapest, Hungary)</option>
+        <option value="hu2">Two Hungary (Budapest, Hungary)</option>
+        <option value="hu3">YetToTel Hungary (Budapest, Hungary)</option>
+        <option value="is">Siminn+ (Reykjavík, Iceland)</option>
+        <option value="ie">Eirlink Communications (Dublin, Ireland)</option>
+        <option value="ie2">Vodaroam Éire (Dublin, Ireland)</option>
+        <option value="ie3">Four Éire (Dublin, Ireland)</option>
+        <option value="it">ITM Italia (Milan, Italy)</option>
+        <option value="it2">Vodaroam Italia (Milan, Italy)</option>
+        <option value="it3">WindFour Italia (Milan, Italy)</option>
+        <option value="xk">IPKObit (Pristina, Kosovo)</option>
+        <option value="lv">TetraNet Latvia (Riga, Latvia)</option>
+        <option value="li">LiechtenLink (Vaduz, Liechtenstein)</option>
+        <option value="lt">Telias Lietuva (Vilnius, Lithuania)</option>
+        <option value="lu">POST+ Lux (Luxembourg City, Luxembourg)</option>
+        <option value="mt">GO! Malta+ (Valletta, Malta)</option>
+        <option value="md">MoldaTelecom (Chișinău, Moldova)</option>
+        <option value="mc">MonaCom (Monaco, Monaco)</option>
+        <option value="me">CrnaTelecom (Podgorica, Montenegro)</option>
+        <option value="nl">K.P.Now (Amsterdam, Netherlands)</option>
+        <option value="nl2">Vodaroam Nederland (Amsterdam, Netherlands)</option>
+        <option value="nl3">Odid-Oh Nederland (Amsterdam, Netherlands)</option>
+        <option value="mk">MaKTel+ (Skopje, North Macedonia)</option>
+        <option value="no">TeleNord (Oslo, Norway)</option>
+        <option value="no2">Telias Norge (Oslo, Norway)</option>
+        <option value="no3">IceE Norge (Oslo, Norway)</option>
+        <option value="pl">Lemon PL (Warsaw, Poland)</option>
+        <option value="pl2">Playy PL (Warsaw, Poland)</option>
+        <option value="pl3">T-Mobil PL (Warsaw, Poland)</option>
+        <option value="pt">MEOW Portugal (Lisbon, Portugal)</option>
+        <option value="pt2">Vodaroam Portugal (Lisbon, Portugal)</option>
+        <option value="pt3">N.O.S.not Portugal (Lisbon, Portugal)</option>
+        <option value="ro">Digiti (Bucharest, Romania)</option>
+        <option value="ro2">Lemon România (Bucharest, Romania)</option>
+        <option value="ro3">Vodaroam România (Bucharest, Romania)</option>
+        <option value="ru">RosTelecom (Moscow, Russia)</option>
+        <option value="sm">SanMarinoCom (San Marino, San Marino)</option>
+        <option value="rs">mtsBit (Belgrade, Serbia)</option>
+        <option value="sk">Slovacom (Bratislava, Slovakia)</option>
+        <option value="sk2">Lemon Slovensko (Bratislava, Slovakia)</option>
+        <option value="sk3">O3 Slovensko (Bratislava, Slovakia)</option>
+        <option value="si">Telemesh SLO (Ljubljana, Slovenia)</option>
+        <option value="es">MovieStar (Madrid, Spain)</option>
+        <option value="es2">Lemon España (Madrid, Spain)</option>
+        <option value="es3">Vodaroam España (Madrid, Spain)</option>
+        <option value="se">Telias (Stockholm, Sweden)</option>
+        <option value="se2">TeleThree Sverige (Stockholm, Sweden)</option>
+        <option value="se3">TeleNord Sverige (Stockholm, Sweden)</option>
+        <option value="ch">SwissConn (Zurich, Switzerland)</option>
+        <option value="ch2">SunRised Schweiz (Zurich, Switzerland)</option>
+        <option value="ch3">SaltyNet Schweiz (Zurich, Switzerland)</option>
+        <option value="ua">KyivStarNet (Kyiv, Ukraine)</option>
+        <option value="gb">British Internet (BI) Broadband (London, United Kingdom)</option>
+        <option value="gb2">Vodaroam UK (London, United Kingdom)</option>
+        <option value="gb3">Four UK (London, United Kingdom)</option>
+        <option value="va">PopeNet (Vatican City, Vatican City)</option>
+      </optgroup>
+      <optgroup label="Other regions">
+        <option value="us">ComcastIT (New York, United States)</option>
+        <option value="ca">RogersLand (Toronto, Canada)</option>
+        <option value="mx">TelMex+ (Mexico City, Mexico)</option>
+        <option value="br">ViVoom Brasil (São Paulo, Brazil)</option>
+        <option value="ar">PersonalNet+ (Buenos Aires, Argentina)</option>
+        <option value="cl">EntelNot (Santiago, Chile)</option>
+        <option value="co">ClaroNot Colombia (Bogotá, Colombia)</option>
+        <option value="za">Vodaroam SA (Johannesburg, South Africa)</option>
+        <option value="ng">MTiN Nigeria (Lagos, Nigeria)</option>
+        <option value="ke">SafariCom (Nairobi, Kenya)</option>
+        <option value="eg">Vodaroam Egypt (Cairo, Egypt)</option>
+        <option value="ma">MarocTele (Casablanca, Morocco)</option>
+        <option value="tr">TürkTelecom (Istanbul, Turkey)</option>
+        <option value="il">ERR 404 NOT FOUND</option>
+        <option value="ae">Etisalot (Dubai, UAE)</option>
+        <option value="sa">STCO Arabia (Riyadh, Saudi Arabia)</option>
+        <option value="qa">OoreDon (Doha, Qatar)</option>
+        <option value="in">Jyo Networks (Mumbai, India)</option>
+        <option value="pk">PTCLplus (Karachi, Pakistan)</option>
+        <option value="bd">GrameenFone+ (Dhaka, Bangladesh)</option>
+        <option value="cn">China Telekom (Shanghai, China)</option>
+        <option value="sg">SingTele (Singapore, Singapore)</option>
+        <option value="th">TrueNot Thailand (Bangkok, Thailand)</option>
+        <option value="vn">VietTelCo (Ho Chi Minh City, Vietnam)</option>
+        <option value="ph">GlobeNot Telecom (Manila, Philippines)</option>
+        <option value="id">TelecomSell (Jakarta, Indonesia)</option>
+        <option value="jp">SoftBonk Japan (Tokyo, Japan)</option>
+        <option value="kr">SKTelekom (Seoul, South Korea)</option>
+        <option value="au">TelStrara (Sydney, Australia)</option>
+        <option value="nz">SparkPlug NZ (Auckland, New Zealand)</option>
+        <option value="pe">ClaroNot Peru (Lima, Peru)</option>
+        <option value="ec">CNTE Ecuador (Quito, Ecuador)</option>
+        <option value="ve">CANTVE (Caracas, Venezuela)</option>
+        <option value="gh">MTiN Ghana (Accra, Ghana)</option>
+        <option value="et">EthioTele (Addis Ababa, Ethiopia)</option>
+        <option value="tz">Vodaroam TZ (Dar es Salaam, Tanzania)</option>
+        <option value="iq">ZainNetCom (Baghdad, Iraq)</option>
+        <option value="ir">IranCells (Tehran, Iran)</option>
+        <option value="jo">Lemon Jordan (Amman, Jordan)</option>
+        <option value="lb">AlfaNetCom (Beirut, Lebanon)</option>
+        <option value="lk">DialogNot (Colombo, Sri Lanka)</option>
+        <option value="np">NTCom Nepal (Kathmandu, Nepal)</option>
+        <option value="mm">MPTele Myanmar (Yangon, Myanmar)</option>
+        <option value="kh">SmartAxiCom (Phnom Penh, Cambodia)</option>
+        <option value="tw">ChungHwaConn (Taipei, Taiwan)</option>
+        <option value="hk">HKTele (Hong Kong, Hong Kong)</option>
+        <option value="mn">MobiComm MN (Ulaanbaatar, Mongolia)</option>
+        <option value="kz">KzCells (Almaty, Kazakhstan)</option>
+        <option value="uz">BeeLined UZ (Tashkent, Uzbekistan)</option>
+        <option value="fj">Vodaroam Fiji (Suva, Fiji)</option>
+        <option value="pg">DigiCels PNG (Port Moresby, Papua New Guinea)</option>
+      </optgroup>
+      <option value="custom">Custom Server</option>
+    </select>
+  </div>
+  <div class="field" id="serverCustomWrap" style="display:none;">
+    <label>Custom server name</label>
+    <input type="text" id="serverCustomInput" maxlength="60" placeholder="e.g. MyTown — PixieNet Exchange">
+  </div>
+
+  <div class="field">
+    <label>Network icon</label>
+    <select id="netIconSelect">
+      <option value="internet">Internet (Generic)</option>
+      <option value="fibre">Fibre</option>
+      <option value="wifi">Wi-Fi</option>
+      <option value="cable">Cable</option>
+      <option value="satellite">Satellite Dish</option>
+      <option value="tower">Radio Tower</option>
+      <option value="laser">Laser Link</option>
+      <option value="chip">IoT Chip</option>
+      <option value="enterprise">Enterprise</option>
+      <option value="switch">Network Switch</option>
+      <option value="submarinecable">Submarine Cable</option>
+      <option value="rocket">Experimental</option>
+      <option value="mesh">Mesh</option>
+      <option value="latency">Low Latency</option>
+      <option value="bluetooth">Bluetooth</option>
+      <option value="thunderbolt">Thunderbolt</option>
+      <option value="five_g">5G</option>
+      <option value="four_g">4G / LTE</option>
+      <option value="three_g">3G</option>
+      <option value="two_g">2G</option>
+    </select>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="field">
+    <label>Download target (Mbps)</label>
+    <input type="number" id="dl" min="0.01" max="1000000" step="0.01" value="940" inputmode="decimal">
+  </div>
+  <div class="field">
+    <label>Upload target (Mbps)</label>
+    <input type="number" id="ul" min="0.01" max="1000000" step="0.01" value="880" inputmode="decimal">
+  </div>
+  <div class="field">
+    <label>Base ping <span class="fval" id="pgVal">5</span> ms</label>
+    <input type="range" id="pg" min="0.1" max="1500" step="0.1" value="5">
+  </div>
+  <div class="field">
+    <label>Jitter <span class="fval" id="jtVal">1</span> ms</label>
+    <input type="range" id="jt" min="0" max="100" value="1">
+  </div>
+  <div class="field">
+    <label>Instability <span class="fval" id="inVal">8</span> %</label>
+    <input type="range" id="ins" min="0" max="100" value="8">
+  </div>
+  <div class="field">
+    <label>Packet loss <span class="fval" id="plVal">0.0</span> %</label>
+    <input type="range" id="pl" min="0" max="50" value="0">
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="field">
+    <label>Test duration <span class="fval" id="durVal">8</span> s</label>
+    <input type="range" id="dur" min="4" max="15" value="8">
+  </div>
+  <div class="hint">Duration applies to each of the download and upload phases.</div>
+
+  <div class="divider"></div>
+
+  <div class="field">
+    <label class="toggle-row">
+      <span>Weather effects</span>
+      <input type="checkbox" id="weatherToggle">
+      <span class="toggle-switch"></span>
+    </label>
+    <div class="hint">Affects wireless, satellite, and line-of-sight presets. Wired connections are unaffected.</div>
+  </div>
+  <div class="field" id="weatherModeWrap" style="display:none;">
+    <label>Weather condition</label>
+    <select id="weatherSelect">
+      <option value="clear">Clear Skies</option>
+      <option value="lightrain">Light Rain</option>
+      <option value="heavyrain">Heavy Rain</option>
+      <option value="storm">Thunderstorm</option>
+      <option value="snow">Snow</option>
+      <option value="fog">Dense Fog</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label class="toggle-row">
+      <span>Simulate connection failure</span>
+      <input type="checkbox" id="failToggle">
+      <span class="toggle-switch"></span>
+    </label>
+    <div class="hint">Next test attempt will fail to connect instead of running.</div>
+  </div>
+
+  <div class="field" id="failModeWrap" style="display:none;">
+    <label>Failure reason</label>
+    <select id="failModeSelect">
+      <option value="random">Randomized</option>
+      <option value="conn_refused">Connection Refused</option>
+      <option value="dns_fail">DNS Resolution Failed</option>
+      <option value="timeout">Connection Timeout</option>
+      <option value="auth_fail">Authentication Failed</option>
+      <option value="no_signal">No Carrier Signal</option>
+      <option value="gateway_unreachable">Gateway Unreachable</option>
+      <option value="server_503">Server Unavailable (503)</option>
+      <option value="maintenance">ISP Maintenance</option>
+      <option value="rate_limited">Rate Limited (429)</option>
+      <option value="firewall">Firewall Blocked</option>
+      <option value="link_down">Link Down</option>
+      <option value="suspended">Account Suspended</option>
+      <option value="congestion">Local Congestion</option>
+      <option value="packet_loss">Critical Packet Loss</option>
+      <option value="unknown">Unknown Error</option>
+      <option value="custom">Custom</option>
+    </select>
+  </div>
+  <div class="field" id="failCustomWrap" style="display:none;">
+    <label>Custom error code</label>
+    <input type="text" id="failCustomCode" maxlength="30" placeholder="e.g. ERR_MY_ISP_001" value="ERR_CUSTOM_001">
+    <label style="margin-top:12px;">Custom error message</label>
+    <input type="text" id="failCustomMsg" maxlength="120" placeholder="e.g. Failed to connect. Contact support." value="Failed to connect to network. Contact your provider for further information.">
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/dom-helper.js"></script>
+<script src="js/network-icons.js"></script>
+<script src="js/ip-simulator.js"></script>
+<script src="js/config-panel.js"></script>
+<script src="js/gauge.js"></script>
+<script src="js/simulation.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
