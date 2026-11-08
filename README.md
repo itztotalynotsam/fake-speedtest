@@ -1,6 +1,6 @@
 # fake-speedtest
 # Code name: Testspeed
-# GITHUB PAGE IS BROKEN, USE LOCALLY BY DOWNLOADING IT.
+# Open https://itztotalynotsam.github.io/fake-speedtest or click onto the link on the right top side (--->)
 A configurable fake speedtest website with simulated network behavior, connection types, ISPs, servers, weather effects, and connection failures.
 
 ## Disclaimer
