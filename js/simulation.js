@@ -68,7 +68,7 @@
   });
 
   // Plain-language label for each phase key.
-  const PHASE_LABELS = {ping:'Measuring ping', download:'Measuring download', upload:'Measuring upload', done:'Complete', connecting:'Connecting'};
+  const PHASE_LABELS = {ping:'Measuring ping', download:'Measuring download', finding:'Finding nearest server', upload:'Measuring upload', done:'Complete', connecting:'Connecting'};
 
   // Updates the label above the big number and tells the page which phase we're in
   // (body[data-phase] drives the colours in the CSS).
@@ -90,8 +90,9 @@
     bigValue.textContent = '···';   // the big number waits; ping shows up in the small Ping stat instead
     const locExtra = currentLocationExtra();
     const weatherImpact = currentWeatherImpact();
-    const effectivePing = cfg.ping + locExtra + weatherImpact*120;
-    const effectiveJitter = cfg.jitter * (1 + weatherImpact*2.5);
+    const peak = peakImpact();   // time-of-day congestion
+    const effectivePing = cfg.ping + locExtra + weatherImpact*120 + peak.ping;
+    const effectiveJitter = cfg.jitter * (1 + weatherImpact*2.5) * (1 + (1-peak.speed)*3);
     // the gauge stays calm during ping: park it at its idle position and keep the sky's ping colours
     setGaugeMax(2); pushSample(0.6, 'idle'); aurora.setPhase('ping');
     const samples = [];
@@ -136,10 +137,11 @@
     const seed = Math.random()*10;
 
     // this run's luck: usually within about 4% of the preset, never more than +4% / -10%
-    const aim = target * Math.min(1.04, Math.max(0.90, 1 + gaussianNoise()*0.03));
+    const peak = peakImpact();   // time-of-day congestion lowers the speed and raises latency
+    const aim = target * peak.speed * Math.min(1.04, Math.max(0.90, 1 + gaussianNoise()*0.03));
 
     // how much extra delay a full link adds (slow links bloat more; upload bloats more than download)
-    const baseLatency = cfg.ping + currentLocationExtra() + weatherImpact*120;
+    const baseLatency = cfg.ping + currentLocationExtra() + weatherImpact*120 + peak.ping;
     const bloatMs = Math.min(600, 800/Math.sqrt(Math.max(target,1)))
                   * (phase==='upload' ? 1.4 : 1) * (0.3 + cfg.ins/30) * (1 + weatherImpact*2);
 
@@ -182,7 +184,7 @@
           lossEvents++;
         }
 
-        let v = aim*rampFactor*dipFactor*lossFactor + noiseWave(elapsed/1000, seed, magnitude*rampFactor);
+        let v = aim*rampFactor*dipFactor*lossFactor*scenarioFactor(elapsed/durationMs, seed) + noiseWave(elapsed/1000, seed, magnitude*rampFactor);
         v = Math.max(0.05, v);
 
         // smooth what we show (about a quarter-second memory)
@@ -206,6 +208,7 @@
           bigValue.textContent = disp.value;
           bigUnit.textContent = disp.unit;
           loadedEl.textContent = loaded.toFixed(0);
+          graphPoint(phase, Math.min(1, elapsed/durationMs), shown);   // add a point to the live graph
         }
 
         if(elapsed >= durationMs){

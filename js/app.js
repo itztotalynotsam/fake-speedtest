@@ -30,6 +30,8 @@
   async function runTest(){
     startBtn.disabled = true;
     resultsPanel.classList.remove('show');
+    hideExtras();          // hide last run's verdict and save button
+    graphReset();          // start a fresh live graph
     el('resultTimestamp').classList.remove('show');
     trail = [];            // clear the gauge's old trail
     rerollIP();            // pick a fresh fake IP for this run
@@ -44,6 +46,7 @@
     }
 
     testing = true;
+    await findServer();    // short 'finding nearest server' step
 
     const pingRes = await runPing();
     await sleep(200);
@@ -74,6 +77,10 @@
     const tsEl = el('resultTimestamp');
     tsEl.textContent = `Test completed ${dateStr} at ${timeStr}`;
     tsEl.classList.add('show');
+
+    // verdict, save button, and history
+    onTestComplete({down:downRes.speed, up:upRes.speed, ping:pingRes.ping, jitter:pingRes.jitter,
+      loss:Math.max(downRes.loss, upRes.loss, cfg.pl), dlPing:downRes.loaded, ulPing:upRes.loaded});
 
     testing = false;
     startBtn.disabled = false;

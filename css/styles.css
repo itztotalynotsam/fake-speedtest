@@ -147,6 +147,32 @@ main{ display:flex; flex-direction:column; align-items:center; }
 .result-timestamp{ display:none; margin-top:14px; text-align:center; font-size:12.5px; color:var(--text-faint); }
 .result-timestamp.show{ display:block; }
 
+/* ===== Live graph, verdict, save button, history ===== */
+.graph-wrap{ display:none; width:100%; margin-top:22px; }
+.graph-wrap.show{ display:block; }
+.graph-wrap canvas{ display:block; width:100%; height:130px; }
+.graph-legend{ display:flex; justify-content:center; gap:20px; margin-top:6px; font-size:13px; color:var(--text-dim); }
+.graph-legend span::before{ content:''; display:inline-block; width:14px; height:3px; border-radius:2px; margin-right:7px; vertical-align:middle; }
+.lg-down::before{ background:linear-gradient(90deg,var(--green),var(--ice)); }
+.lg-up::before{ background:linear-gradient(90deg,var(--pink),var(--violet)); }
+.verdict{ display:none; margin-top:22px; text-align:center; }
+.verdict.show{ display:block; }
+.verdict-line{ font-size:18px; font-weight:600; letter-spacing:-.01em; }
+.chips{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:12px; }
+.chip{ font-size:13.5px; padding:6px 13px; border-radius:999px; background:var(--glass); border:1px solid var(--glass-line); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+.chip b{ font-weight:600; margin-left:4px; }
+.chip.great{ border-color:rgba(93,255,180,.5); } .chip.great b{ color:var(--green); }
+.chip.ok{ border-color:rgba(63,216,255,.45); }   .chip.ok b{ color:var(--ice); }
+.chip.poor{ border-color:rgba(255,110,130,.5); } .chip.poor b{ color:var(--rose); }
+.actions{ display:none; margin-top:18px; } .actions.show{ display:block; }
+.ghost-btn{ font-family:var(--ui); font-size:14px; font-weight:500; color:var(--text); cursor:pointer; padding:10px 22px; border-radius:999px; background:var(--glass); border:1px solid var(--glass-line); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); transition:border-color .15s, color .15s; }
+.ghost-btn:hover{ border-color:rgba(93,255,180,.55); color:var(--green); }
+.ghost-btn.wide{ width:100%; }
+.history{ display:none; width:100%; margin-top:26px; } .history.show{ display:block; }
+.history-head{ display:flex; justify-content:space-between; align-items:center; font-size:13.5px; color:var(--text-dim); margin-bottom:6px; }
+.link-btn{ background:none; border:none; color:var(--text-faint); font-family:var(--ui); font-size:13px; cursor:pointer; } .link-btn:hover{ color:var(--rose); }
+.history canvas{ display:block; width:100%; height:64px; }
+
 /* ===== Footer ===== */
 .site-footer{ width:100%; margin-top:56px; padding-top:22px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px; }
 .footer-links{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px 18px; }

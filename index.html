@@ -79,6 +79,20 @@
       </div>
     </div>
     <div class="result-timestamp" id="resultTimestamp"></div>
+
+    <!-- Live speed graph: download and upload over time -->
+    <div class="graph-wrap" id="graphWrap">
+      <canvas id="graph"></canvas>
+      <div class="graph-legend"><span class="lg-down">Download</span><span class="lg-up">Upload</span></div>
+    </div>
+    <!-- Plain-language quality verdict (filled in by extras.js) -->
+    <div class="verdict" id="verdict"></div>
+    <div class="actions" id="actions"><button class="ghost-btn" id="shareBtn">Save result image</button></div>
+    <!-- Trend of the last few tests, stored in this browser -->
+    <div class="history" id="history">
+      <div class="history-head"><span id="histTitle">Recent tests</span><button class="link-btn" id="clearHistory">Clear</button></div>
+      <canvas id="histCanvas"></canvas>
+    </div>
   </main>
 
 <footer class="site-footer">
@@ -453,9 +467,8 @@
   <div class="field">
     <label>Gauge max speed</label>
     <select id="gaugeMaxSel">
-      <option value="auto">Auto (fits the preset)</option>
       <option value="100">100 Mbps</option>
-      <option value="1000">1 Gbps (1000 Mbps)</option>
+      <option value="1000" selected>1 Gbps (1000 Mbps)</option>
       <option value="10000">10 Gbps (10000 Mbps)</option>
     </select>
   </div>
@@ -485,6 +498,26 @@
     <input type="range" id="dur" min="4" max="15" value="8">
   </div>
   <div class="hint">Duration applies to each of the download and upload phases.</div>
+
+  <div class="field">
+    <label>Scenario</label>
+    <select id="scenarioSel">
+      <option value="none">None (steady)</option>
+      <option value="boost">Speed boost, then drops</option>
+      <option value="cap">Data cap hit mid-test</option>
+      <option value="wobble">Wi-Fi signal wobble</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>Time of day</label>
+    <select id="peakSel">
+      <option value="off">Ignore (no congestion)</option>
+      <option value="auto">Use my clock</option>
+      <option value="evening">Evening peak (9 pm)</option>
+      <option value="night">Late night (4 am)</option>
+    </select>
+  </div>
+  <div class="hint">Busy hours slow shared connections like cable, Wi-Fi and mobile far more than dedicated lines.</div>
 
   <div class="divider"></div>
 
@@ -545,6 +578,10 @@
     <label style="margin-top:12px;">Custom error message</label>
     <input type="text" id="failCustomMsg" maxlength="120" placeholder="e.g. Failed to connect. Contact support." value="Failed to connect to network. Contact your provider for further information.">
   </div>
+
+  <div class="divider"></div>
+  <button class="ghost-btn wide" id="copyLinkBtn">Copy settings link</button>
+  <div class="hint" style="margin-top:8px;">Opens with exactly these settings. Press space on the main screen to start a test.</div>
 </div>
 
 <script src="js/data.js"></script>
@@ -557,5 +594,6 @@
 <script src="js/gauge.js"></script>
 <script src="js/simulation.js"></script>
 <script src="js/app.js"></script>
+<script src="js/extras.js"></script>
 </body>
 </html>

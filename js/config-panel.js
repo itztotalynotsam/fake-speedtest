@@ -119,11 +119,11 @@
   }
 
 // ---------- Gauge scale ----------
-  // 'Auto' fits the dial to the preset; a fixed value (100 / 1000 / 10000 Mbps) pins the dial's end,
-  // even if the preset is faster. The needle just stops at the end; the number still shows the real speed.
+  // The dial's end is whatever the user picked (100 / 1000 / 10000 Mbps; 1000 by default), even if the
+  // preset is faster. The needle just stops at the end; the number still shows the real speed.
   const gaugeMaxSel = el('gaugeMaxSel');
   function gaugeScaleFor(target){
-    return gaugeMaxSel.value === 'auto' ? Math.max(20, target*1.3) : +gaugeMaxSel.value;
+    return +gaugeMaxSel.value;
   }
 
 // ---------- Weather effects ----------
