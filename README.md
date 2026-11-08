@@ -1,6 +1,6 @@
 # fake-speedtest
 # Code name: Testspeed
-# TO USE SPEEDTEST, CLICK ON LINK THAT IS UNDER THE ABOUT ON THIS SITE
+# GITHUB PAGE IS BROKEN, USE LOCALLY BY DOWNLOADING IT.
 A configurable fake speedtest website with simulated network behavior, connection types, ISPs, servers, weather effects, and connection failures.
 
 ## Disclaimer
