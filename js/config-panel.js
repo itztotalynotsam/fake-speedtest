@@ -7,7 +7,6 @@
   const cfg = {dl:940, ul:880, ping:5, jitter:1, ins:5, pl:0.0, dur:8};
 
   const presetSel = el('preset'), dlS=el('dl'), ulS=el('ul'), pgS=el('pg'), jtS=el('jt'), insS=el('ins'), plS=el('pl'), durS=el('dur');
-  const pgVal=el('pgVal'), jtVal=el('jtVal'), inVal=el('inVal'), plVal=el('plVal'), durVal=el('durVal');
   const locationSel = el('location'), deviceInput = el('deviceName');
   const ispPresetSel = el('ispPreset'), ispCustomWrap = el('ispCustomWrap'), ispCustomInput = el('ispCustomInput');
   const serverCustomWrap = el('serverCustomWrap'), serverCustomInput = el('serverCustomInput');
@@ -18,34 +17,26 @@
     if(name==='custom') return;
     const p = presets[name];
     cfg.dl=p.dl; cfg.ul=p.ul; cfg.ping=p.ping; cfg.jitter=p.jitter; cfg.ins=p.ins; cfg.pl=p.pl;
-    dlS.value=p.dl; ulS.value=p.ul; pgS.value=p.ping; jtS.value=p.jitter; insS.value=p.ins; plS.value=Math.round(p.pl*10);
+    dlS.value=p.dl; ulS.value=p.ul; pgS.value=p.ping; jtS.value=p.jitter; insS.value=p.ins; plS.value=p.pl;
     syncLabels();
     if(presetIconDefault[name]) setNetIcon(presetIconDefault[name]);
     if(presetTech[name]){ techPresetSel.value = name; applyTechPreset(name); }
     if(typeof updateWeatherLine==='function') updateWeatherLine();
   }
-  // Paint each slider's filled portion (the CSS reads the --p percentage).
-  function paintSliders(){
-    document.querySelectorAll('input[type=range]').forEach(r=>{
-      r.style.setProperty('--p', ((r.value-r.min)/(r.max-r.min)*100)+'%');
-    });
-  }
-  // Copy slider values into their little number labels.
-  function syncLabels(){
-    paintSliders();
-    pgVal.textContent=pgS.value;
-    jtVal.textContent=jtS.value;
-    inVal.textContent=insS.value;
-    plVal.textContent=(plS.value/10).toFixed(1);
-    durVal.textContent=durS.value;
-  }
+  // (the old slider labels are gone: every setting is now a plain number field)
+  function syncLabels(){}
+  // Clamp a typed value into a range; empty or invalid text falls back to the old value.
+  const num = (v, min, max, fallback) => { v = parseFloat(v); return isNaN(v) ? fallback : Math.max(min, Math.min(max, v)); };
   // Read the controls back into cfg (runs whenever the user edits a value).
   function readCfgFromControls(){
     const newDl = +dlS.value, newUl = +ulS.value;
     if(!isNaN(newDl) && newDl>0) cfg.dl=newDl;
     if(!isNaN(newUl) && newUl>0) cfg.ul=newUl;
-    cfg.ping=+pgS.value; cfg.jitter=+jtS.value;
-    cfg.ins=+insS.value; cfg.pl=+plS.value/10; cfg.dur=+durS.value;
+    cfg.ping   = num(pgS.value, 0.1, 5000, cfg.ping);
+    cfg.jitter = num(jtS.value, 0, 1000, cfg.jitter);
+    cfg.ins    = num(insS.value, 0, 100, cfg.ins);
+    cfg.pl     = num(plS.value, 0, 100, cfg.pl);       // packet loss is now typed in percent directly
+    cfg.dur    = num(durS.value, 2, 60, cfg.dur);
   }
 
 // ---------- Technology / ISP / server / device selection ----------

@@ -14,6 +14,8 @@
 <canvas id="aurora" aria-hidden="true"></canvas>
 <!-- Moon and planets, randomised each load (drawn by js/sky-bodies.js) -->
 <canvas id="bodies" aria-hidden="true"></canvas>
+<!-- Rain, snow and lightning for the Weather theme (drawn by js/aurora.js) -->
+<canvas id="fx" aria-hidden="true"></canvas>
 
 <div class="app">
   <header>
@@ -59,6 +61,7 @@
     <div class="server-line" id="ipLine">Your IP: —</div>
     <div class="server-line" id="techLine">Tech: —</div>
     <div class="server-line" id="weatherLine" style="display:none;">Weather: —</div>
+    <div class="server-line" id="signalLine" style="display:none;"></div>
 
     <div class="results" id="results">
       <div class="result-card rcard-ping">
@@ -114,6 +117,17 @@
     <h2>Settings</h2>
     <button class="close-btn" id="closeBtn">&times;</button>
   </div>
+
+  <div class="field">
+    <label for="themeSel">Theme</label>
+    <select id="themeSel">
+      <option value="aurora">Aurora</option>
+      <option value="galaxy">Galaxy</option>
+      <option value="dark">Basic dark</option>
+      <option value="weather">Weather (follows the weather condition)</option>
+    </select>
+  </div>
+  <div class="hint">The Weather theme switches weather effects on, then the sky follows the condition you pick: rain, storm, snow, fog or clear.</div>
 
   <div class="field">
     <label>Connection preset</label>
@@ -475,27 +489,27 @@
   <div class="hint">Sets where the dial ends. If the speed is higher, the needle stops at the end but the number still shows the real speed.</div>
 
   <div class="field">
-    <label>Base ping <span class="fval" id="pgVal">5</span> ms</label>
-    <input type="range" id="pg" min="0.1" max="1500" step="0.1" value="5">
+    <label for="pg">Base ping (ms)</label>
+    <input type="number" id="pg" min="0.1" max="5000" step="0.1" value="5" inputmode="decimal">
   </div>
   <div class="field">
-    <label>Jitter <span class="fval" id="jtVal">1</span> ms</label>
-    <input type="range" id="jt" min="0" max="100" value="1">
+    <label for="jt">Jitter (ms)</label>
+    <input type="number" id="jt" min="0" max="1000" step="0.1" value="1" inputmode="decimal">
   </div>
   <div class="field">
-    <label>Instability <span class="fval" id="inVal">8</span> %</label>
-    <input type="range" id="ins" min="0" max="100" value="8">
+    <label for="ins">Instability (%)</label>
+    <input type="number" id="ins" min="0" max="100" step="1" value="8" inputmode="decimal">
   </div>
   <div class="field">
-    <label>Packet loss <span class="fval" id="plVal">0.0</span> %</label>
-    <input type="range" id="pl" min="0" max="50" value="0">
+    <label for="pl">Packet loss (%)</label>
+    <input type="number" id="pl" min="0" max="100" step="0.1" value="0" inputmode="decimal">
   </div>
 
   <div class="divider"></div>
 
   <div class="field">
-    <label>Test duration <span class="fval" id="durVal">8</span> s</label>
-    <input type="range" id="dur" min="4" max="15" value="8">
+    <label for="dur">Test duration (seconds)</label>
+    <input type="number" id="dur" min="2" max="60" step="1" value="8" inputmode="decimal">
   </div>
   <div class="hint">Duration applies to each of the download and upload phases.</div>
 
@@ -518,6 +532,36 @@
     </select>
   </div>
   <div class="hint">Busy hours slow shared connections like cable, Wi-Fi and mobile far more than dedicated lines.</div>
+
+  <div class="divider"></div>
+  <div class="field">
+    <label for="sigPreset">Signal and distance</label>
+    <select id="sigPreset">
+      <option value="auto">Auto (random spot for this connection)</option>
+      <option value="near">Right next to the cell / router</option>
+      <option value="good">Good signal</option>
+      <option value="fair">Fair signal</option>
+      <option value="poor">Poor signal (edge of coverage)</option>
+      <option value="custom">Custom</option>
+    </select>
+  </div>
+  <div id="sigCustomWrap" style="display:none;">
+    <div class="field"><label for="sigDist">Distance from cell / router (metres)</label>
+      <input type="number" id="sigDist" min="1" max="50000" step="1" value="250" inputmode="decimal"></div>
+    <div class="field"><label for="sigExtra">Extra loss from walls and buildings (dB)</label>
+      <input type="number" id="sigExtra" min="0" max="60" step="1" value="0" inputmode="decimal"></div>
+  </div>
+  <div class="field">
+    <label for="sigMove">Movement during the test</label>
+    <select id="sigMove">
+      <option value="still">Standing still</option>
+      <option value="walk_away">Walking away</option>
+      <option value="walk_toward">Walking toward</option>
+      <option value="drive_away">Driving away</option>
+      <option value="drive_toward">Driving toward</option>
+    </select>
+  </div>
+  <div class="hint" id="sigHint"></div>
 
   <div class="divider"></div>
 
@@ -589,9 +633,11 @@
 <script src="js/network-icons.js"></script>
 <script src="js/ip-simulator.js"></script>
 <script src="js/config-panel.js"></script>
+<script src="js/themes.js"></script>
 <script src="js/aurora.js"></script>
 <script src="js/sky-bodies.js"></script>
 <script src="js/gauge.js"></script>
+<script src="js/signal.js"></script>
 <script src="js/simulation.js"></script>
 <script src="js/app.js"></script>
 <script src="js/extras.js"></script>

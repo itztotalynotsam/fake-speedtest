@@ -35,6 +35,7 @@
     el('resultTimestamp').classList.remove('show');
     trail = [];            // clear the gauge's old trail
     rerollIP();            // pick a fresh fake IP for this run
+    signalStart();         // pick a fresh distance / signal for this run
     dlPingValEl.textContent = '—';   // clear last run's download/upload ping
     ulPingValEl.textContent = '—';
 

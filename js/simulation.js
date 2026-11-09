@@ -91,8 +91,9 @@
     const locExtra = currentLocationExtra();
     const weatherImpact = currentWeatherImpact();
     const peak = peakImpact();   // time-of-day congestion
-    const effectivePing = cfg.ping + locExtra + weatherImpact*120 + peak.ping;
-    const effectiveJitter = cfg.jitter * (1 + weatherImpact*2.5) * (1 + (1-peak.speed)*3);
+    const sg0 = signalNow();     // signal quality from distance, obstructions and movement
+    const effectivePing = cfg.ping + locExtra + weatherImpact*120 + peak.ping + sg0.ping;
+    const effectiveJitter = cfg.jitter * (1 + weatherImpact*2.5) * (1 + (1-peak.speed)*3) * sg0.jitter;
     // the gauge stays calm during ping: park it at its idle position and keep the sky's ping colours
     setGaugeMax(2); pushSample(0.6, 'idle'); aurora.setPhase('ping');
     const samples = [];
@@ -153,7 +154,7 @@
     const start = performance.now();
     const samples = [];          // raw post-ramp speeds, used for the final result
     const loadedSamples = [];    // loaded-ping readings
-    let dipUntil = 0, dipDepth = 0;
+    let dipUntil = 0, dipDepth = 0, sgLoss = 0, sgN = 0;
     let lossEvents = 0, totalTicks = 0;
     let shown = 0;               // smoothed speed shown to the user
     let lastTick = start, lastText = 0;
@@ -184,7 +185,9 @@
           lossEvents++;
         }
 
-        let v = aim*rampFactor*dipFactor*lossFactor*scenarioFactor(elapsed/durationMs, seed) + noiseWave(elapsed/1000, seed, magnitude*rampFactor);
+        const sg = signalNow();   // weaker signal = slower, laggier, lossier
+        sgLoss += sg.loss; sgN++;
+        let v = aim*rampFactor*dipFactor*lossFactor*scenarioFactor(elapsed/durationMs, seed)*sg.factor + noiseWave(elapsed/1000, seed, magnitude*rampFactor);
         v = Math.max(0.05, v);
 
         // smooth what we show (about a quarter-second memory)
@@ -193,7 +196,7 @@
 
         // loaded ping grows with how full the link is
         const util = Math.min(1, shown/aim);
-        const loaded = baseLatency + bloatMs*util*(0.8 + Math.random()*0.4);
+        const loaded = baseLatency + sg.ping + bloatMs*util*(0.8 + Math.random()*0.4);
 
         // only post-ramp samples count toward the result
         if(elapsed > rampMs*1.1){
@@ -209,6 +212,7 @@
           bigUnit.textContent = disp.unit;
           loadedEl.textContent = loaded.toFixed(0);
           graphPoint(phase, Math.min(1, elapsed/durationMs), shown);   // add a point to the live graph
+          signalLineUpdate(sg);                                        // keep the signal readout live
         }
 
         if(elapsed >= durationMs){
@@ -220,7 +224,7 @@
             speed = kept.reduce((a,b)=>a+b,0)/kept.length;
           }
           const loadedAvg = loadedSamples.length ? loadedSamples.reduce((a,b)=>a+b,0)/loadedSamples.length : baseLatency;
-          const lossPct = Math.min(50, (lossEvents/Math.max(1,totalTicks))*100 + cfg.pl*0.6 + weatherImpact*8);
+          const lossPct = Math.min(50, (lossEvents/Math.max(1,totalTicks))*100 + cfg.pl*0.6 + weatherImpact*8 + sgLoss/Math.max(1,sgN));
           resolve({speed, loss:lossPct, loaded:loadedAvg});
           return;
         }

@@ -8,7 +8,8 @@
   // Every ~100 ms the download/upload phases report [time fraction, speed]; we draw both lines over the same time axis.
   const gCv = el('graph'), gc = gCv.getContext('2d'), gWrap = el('graphWrap');
   let series = {download:[], upload:[]};
-  const COLORS = {download:['93,255,180','63,216,255'], upload:['255,110,199','178,123,255']};
+  // line colours come from the active theme (as 'r,g,b' strings)
+  const COLORS = {get download(){ return aurora.palette('download').slice(0,2).map(a => a.join(',')); }, get upload(){ return aurora.palette('upload').slice(0,2).map(a => a.join(',')); }};
 
   // Size a canvas to its CSS box at the screen's pixel density.
   function fit(cv, ctx){
@@ -115,19 +116,20 @@
     const x = cv.getContext('2d');
     // fill the card with the sky, keeping the upper part (moon, planets, aurora) in frame
     const cover = src => { const s = Math.max(1200/src.width, 630/src.height); x.drawImage(src, (1200-src.width*s)/2, (630-src.height*s)*0.12, src.width*s, src.height*s); };
-    cover(el('aurora')); x.globalCompositeOperation = 'screen'; cover(el('bodies')); x.globalCompositeOperation = 'source-over';   // the current sky as background
+    cover(el('aurora')); x.globalCompositeOperation = 'screen'; cover(el('bodies')); x.globalCompositeOperation = 'source-over'; cover(el('fx'));   // the current sky as background
     const shade = x.createLinearGradient(0,0,0,630); shade.addColorStop(0,'rgba(3,9,18,.25)'); shade.addColorStop(1,'rgba(3,9,18,.75)');
     x.fillStyle = shade; x.fillRect(0,0,1200,630);
+    const D = aurora.palette('download'), U = aurora.palette('upload'), rgb = a => `rgb(${a.join(',')})`;   // theme colours
     const grad = (c1,c2,x0,x1) => { const g = x.createLinearGradient(x0,0,x1,0); g.addColorStop(0,c1); g.addColorStop(1,c2); return g; };
     x.textBaseline = 'alphabetic';
-    x.font = '800 44px "Bricolage Grotesque", sans-serif'; x.fillStyle = grad('#5dffb4','#b27bff',60,260); x.fillText('Testspeed', 60, 86);
+    x.font = '800 44px "Bricolage Grotesque", sans-serif'; x.fillStyle = grad(rgb(D[0]),rgb(U[1]),60,260); x.fillText('Testspeed', 60, 86);
     const big = (label, mbps, x0, c1, c2) => {                       // one big speed block
       const f = formatSpeed(mbps);
       x.font = '500 26px "Bricolage Grotesque", sans-serif'; x.fillStyle = 'rgba(210,235,245,.7)'; x.fillText(label, x0, 215);
       x.font = '500 96px "Martian Mono", monospace'; x.fillStyle = grad(c1,c2,x0,x0+420); x.fillText(f.value, x0, 315);
       x.font = '500 28px "Bricolage Grotesque", sans-serif'; x.fillStyle = 'rgba(210,235,245,.7)'; x.fillText(f.unit, x0, 360);
     };
-    big('Download', r.down, 60, '#5dffb4', '#3fd8ff'); big('Upload', r.up, 640, '#ff6ec7', '#b27bff');
+    big('Download', r.down, 60, rgb(D[0]), rgb(D[1])); big('Upload', r.up, 640, rgb(U[0]), rgb(U[1]));
     [['Ping', r.ping], ['Jitter', r.jitter], ['Download ping', r.dlPing], ['Upload ping', r.ulPing]].forEach((s,i) => {
       const x0 = 60 + i*285;
       x.font = '500 22px "Bricolage Grotesque", sans-serif'; x.fillStyle = 'rgba(210,235,245,.6)'; x.fillText(s[0], x0, 440);
@@ -152,7 +154,7 @@
     el('histTitle').textContent = `Last ${h.length} tests`;
     const [w,ht] = fit(hCv, hc); hc.clearRect(0,0,w,ht);
     const max = Math.max(...h.map(r => Math.max(r.down, r.up))) * 1.1;
-    [['down','93,255,180'],['up','255,110,199']].forEach(([k,col]) => {
+    [['down',aurora.palette('download')[0].join(',')],['up',aurora.palette('upload')[0].join(',')]].forEach(([k,col]) => {
       const P = i => [8 + i*(w-16)/(h.length-1), 6 + (ht-12)*(1 - h[i][k]/max)];
       hc.beginPath(); h.forEach((_,i) => i ? hc.lineTo(...P(i)) : hc.moveTo(...P(i)));
       hc.strokeStyle = `rgb(${col})`; hc.lineWidth = 2; hc.lineJoin = 'round'; hc.stroke();
